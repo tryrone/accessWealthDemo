@@ -6,7 +6,7 @@ import styled from 'styled-components/native';
 import CustomText from '../CustomText';
 import Fonts from '../../constants/Fonts';
 
-const BtnWrap = styled.Pressable<{
+const BtnWrap = styled.TouchableOpacity<{
   width?: string;
   height?: string;
   bgColor?: string;

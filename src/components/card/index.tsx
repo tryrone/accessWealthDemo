@@ -33,6 +33,18 @@ const Image = styled.Image`
   background-color: ${Colors.white};
 `;
 
+type DataObject = {
+  instrument?: null | any;
+  key: string;
+  units: number;
+  value: number;
+};
+
+type DataArray = {
+  key: Record<any, any>;
+  values: Array<DataObject>;
+};
+
 type CardProps = {
   image: string;
   short: string;
@@ -42,6 +54,7 @@ type CardProps = {
   startRgba: string;
   strokeColor: string;
   onPress: () => void;
+  data: Array<DataArray>;
 };
 
 const Card = ({
@@ -53,14 +66,14 @@ const Card = ({
   startRgba,
   strokeColor,
   onPress,
+  data: newData,
 }: CardProps) => {
-  const data = [
-    {x: 1, y: 2},
-    {x: 2, y: 3},
-    {x: 3, y: 5},
-    {x: 4, y: 4},
-    {x: 5, y: 7},
-  ];
+  const formattedArray = newData?.[0]?.values?.map((obj: any) => {
+    return {
+      x: obj?.key,
+      y: obj?.value,
+    };
+  });
   return (
     <Wrap onPress={onPress}>
       <SpacedRow style={{paddingHorizontal: 12, paddingTop: 12}}>
@@ -118,7 +131,7 @@ const Card = ({
           </LinearGradient>
         </Defs>
         <VictoryArea
-          data={data}
+          data={formattedArray}
           style={{
             data: {
               fill: 'url(#gradient)',

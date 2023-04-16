@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useState} from 'react';
 import SafeAreaWrap from '../components/SafeAreaWrap';
 import Colors from '../constants/Colors';
 import styled from 'styled-components/native';
@@ -10,11 +11,16 @@ import TextInput, {Password} from '../components/TextInput';
 import Button from '../components/Button';
 import {ScreenDefaultProps} from '../constants/types';
 import {DASHBOARD} from '../constants/navigationConstants';
+import Toast from 'react-native-toast-message';
+import {Formik} from 'formik';
+import * as Yup from 'yup';
+import {storeData} from '../utils';
 
 const Row = styled.View`
   flex-direction: row;
   align-items: center;
 `;
+
 const SpacedRow = styled.View<{mt?: number}>`
   flex-direction: row;
   align-items: center;
@@ -46,6 +52,39 @@ const OAuthBtn = styled.TouchableOpacity`
 
 const Login = ({navigation}: ScreenDefaultProps) => {
   const wrapperStyle = {paddingHorizontal: 16, paddingTop: 20};
+  const [loading, setLoading] = useState(false);
+  const loginValidation = Yup.object().shape({
+    username: Yup.string().required('Required'),
+    password: Yup.string().required('Required'),
+  });
+
+  const loginUser = (values: {username: string; password: string}) => {
+    setLoading(true);
+    fetch('https://casestudy-api-1.accesswealth.io/api/authenticate', {
+      method: 'POST',
+      headers: {
+        accept: '*/*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(values),
+    })
+      .then(res => res.json())
+      .then(async (res: any) => {
+        setLoading(false);
+        await storeData(res);
+
+        navigation.navigate(DASHBOARD);
+      })
+      .catch(err => {
+        setLoading(false);
+        Toast.show({
+          type: 'error',
+          text1: 'Error logging in',
+          text2: err?.error || 'Unable to login right now',
+        });
+      });
+  };
+
   return (
     <SafeAreaWrap
       bg={Colors.bg_color}
@@ -83,33 +122,58 @@ const Login = ({navigation}: ScreenDefaultProps) => {
         </OAuthBtn>
       </SpacedRow>
 
-      <TextInput
-        value=""
-        placeholder="tim@apple.com"
-        inputType="email-address"
-        title="Email"
-        marginTop={28}
-      />
-
-      <Password
-        value=""
-        placeholder="Enter your password"
-        title="Password"
-        marginTop={12}
-      />
-
-      <Button
-        bgColor={Colors?.primary}
-        text="Log in"
-        fontFamily={Fonts?.PoppinsBold}
-        fontWeight="800"
-        style={{marginTop: 62}}
-        borderRadius="40px"
-        textColor={Colors?.black}
-        onPress={() => {
-          navigation.navigate(DASHBOARD);
+      <Formik
+        initialValues={{
+          username: '',
+          password: '',
         }}
-      />
+        validationSchema={loginValidation}
+        enableReinitialize={false}
+        validateOnChange={false}
+        validateOnBlur={true}
+        onSubmit={(values, actions: any) => {
+          loginUser(values);
+        }}>
+        {({handleSubmit, values, errors, setFieldValue, touched}) => {
+          return (
+            <>
+              <TextInput
+                value={values.username}
+                placeholder="Tin Man"
+                name="username"
+                title="Username"
+                returnValue
+                handleChange={val => setFieldValue('username', val.trim())}
+                errors={touched?.username ? errors.username : ''}
+                marginTop={28}
+              />
+
+              <Password
+                value={values.password}
+                placeholder="Enter your password"
+                title="Password"
+                marginTop={12}
+                returnValue
+                handleChange={val => setFieldValue('password', val)}
+                errors={touched?.password ? errors.password : ''}
+              />
+
+              <Button
+                bgColor={Colors?.primary}
+                text="Log in"
+                fontFamily={Fonts?.PoppinsBold}
+                fontWeight="800"
+                style={{marginTop: 62}}
+                borderRadius="40px"
+                textColor={Colors?.black}
+                onPress={handleSubmit}
+                loading={loading}
+                disabled={loading}
+              />
+            </>
+          );
+        }}
+      </Formik>
     </SafeAreaWrap>
   );
 };

@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   KeyboardTypeOptions,
   Pressable,
@@ -13,11 +13,6 @@ import {ActivePassword, HidePassword} from '../../assets/svg';
 import Colors from '../../constants/Colors';
 import Fonts from '../../constants/Fonts';
 import CustomText from '../CustomText';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
 
 const Wrapper = styled.View<{
   width?: number;
@@ -173,7 +168,7 @@ const TextInput = ({
             fontWeight="500"
             top={4}
             left={5}
-            fontFamily={Fonts?.CircularStdBook}
+            fontFamily={Fonts?.MazzardBold}
             fontSize={13}
             color={Colors.error}>
             {errors}
@@ -188,7 +183,7 @@ type PasswordProps = {
   placeholder: string;
   title?: string;
   placeholderTextColor?: string;
-  handleChange?: ((e: string) => void) | undefined;
+  handleChange: (e: string) => void;
   name?: string;
   value: string;
   disabled?: boolean;
@@ -196,6 +191,7 @@ type PasswordProps = {
   marginTop?: number;
   style?: ViewStyle;
   setFieldTouched?: ((e: any) => void) | undefined;
+  returnValue?: boolean;
 };
 
 export const Password = ({
@@ -209,7 +205,7 @@ export const Password = ({
   marginTop = 0,
   style,
   title,
-  setFieldTouched = () => {},
+  returnValue,
 }: PasswordProps) => {
   const [hidden, setHidden] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -238,7 +234,13 @@ export const Password = ({
         borderColor={focused ? Colors.primary : Colors.inputGreyBg}
         bgColor={Colors.black_btn_bg}>
         <PasswordInput
-          onChangeText={handleChange(name)}
+          onChangeText={
+            returnValue
+              ? (e: string) => {
+                  handleChange(e);
+                }
+              : handleChange(name)
+          }
           placeholder={placeholder}
           placeholderTextColor={placeholderTextColor}
           autoCapitalize={'none'}
@@ -246,7 +248,6 @@ export const Password = ({
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false);
-            setFieldTouched(name);
           }}
           secureTextEntry={!hidden}
           value={value}
@@ -262,7 +263,7 @@ export const Password = ({
             fontWeight="500"
             top={3}
             left={5}
-            fontFamily={Fonts?.PoppinsBold}
+            fontFamily={Fonts?.MazzardBold}
             fontSize={13}
             color={Colors.error}>
             {errors}

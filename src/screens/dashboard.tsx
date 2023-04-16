@@ -15,6 +15,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import CardContentModal from '../components/card/contentModal';
+import {formatCurrency, getData} from '../utils';
+import {Toast} from 'react-native-toast-message/lib/src/Toast';
+import LoadingModal from '../components/LoadingModal';
+
+type NavHeaderProps = {
+  name: string;
+  changeCurrencyCode: (val: string) => void;
+};
 
 const TopContainer = styled.View`
   width: 100%;
@@ -95,7 +103,7 @@ const Circle = styled.View`
   margin-horizontal: -14px;
 `;
 
-const CurrencySwitch = () => {
+const CurrencySwitch = ({changeCurrencyCode}: any) => {
   const [activeTab, setActiveTab] = useState('USD');
   const activePosition = useSharedValue(0);
 
@@ -120,7 +128,10 @@ const CurrencySwitch = () => {
     <CurrencyWrap>
       <FLoatingBtn style={animatedStyles} />
       <CurrBtn
-        onPress={() => setActiveTab('USD')}
+        onPress={() => {
+          setActiveTab('USD');
+          changeCurrencyCode('USD');
+        }}
         left={-10}
         style={{paddingTop: 2}}>
         <CustomText
@@ -132,7 +143,10 @@ const CurrencySwitch = () => {
         </CustomText>
       </CurrBtn>
       <CurrBtn
-        onPress={() => setActiveTab('AED')}
+        onPress={() => {
+          setActiveTab('AED');
+          changeCurrencyCode('AED');
+        }}
         left={10}
         style={{paddingTop: 2}}>
         <CustomText
@@ -148,7 +162,7 @@ const CurrencySwitch = () => {
   );
 };
 
-const NavHeader = () => {
+const NavHeader = ({name, changeCurrencyCode}: NavHeaderProps) => {
   return (
     <NavWrap>
       <View style={{flex: 1}}>
@@ -166,11 +180,11 @@ const NavHeader = () => {
           fontWeight="400"
           numberOfLines={1}
           color={Colors.white}>
-          Steve Smith
+          {name}
         </CustomText>
       </View>
 
-      <CurrencySwitch />
+      <CurrencySwitch changeCurrencyCode={changeCurrencyCode} />
 
       <View style={{flex: 1, alignItems: 'flex-end'}}>
         <BellIcon />
@@ -220,10 +234,77 @@ const BtnRow = () => {
 };
 
 const Dashboard = () => {
+  const [portfolioData, setPortfolioData] = useState<any>({});
+  const [portfolioInView, setPortfolioInView] = useState<any>({});
+  const [detailmodalVisible, setDetailModalVisible] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchPortfolioData();
+  }, []);
+
+  const fetchPortfolioData = async () => {
+    setLoading(true);
+    const userRes = await getData();
+    fetch('https://casestudy-api-1.accesswealth.io/api/portfolio/valuation?', {
+      method: 'GET',
+      headers: {
+        accept: '*/*',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userRes?.token}`,
+      },
+    })
+      .then(res => res.json())
+      .then(async (res: any) => {
+        setLoading(false);
+        setPortfolioData(res);
+      })
+      .catch(err => {
+        setLoading(false);
+        Toast.show({
+          type: 'error',
+          text1: 'Error getting portfolio Data',
+          text2: err?.error || 'Something went wrong please try again later',
+        });
+      });
+  };
+
+  const changeCurrencyCode = async (currencyCode: string) => {
+    setLoading(true);
+    const userRes = await getData();
+    fetch(
+      `https://casestudy-api-1.accesswealth.io/api/portfolio/valuation?currencyCode=${currencyCode}&`,
+      {
+        method: 'GET',
+        headers: {
+          accept: '*/*',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userRes?.token}`,
+        },
+      },
+    )
+      .then(res => res.json())
+      .then(async (res: any) => {
+        setLoading(false);
+        setPortfolioData(res);
+      })
+      .catch(err => {
+        setLoading(false);
+        Toast.show({
+          type: 'error',
+          text1: 'Error getting portfolio Data',
+          text2: err?.error || 'Something went wrong please try again later',
+        });
+      });
+  };
+
   return (
     <View>
       <TopContainer>
-        <NavHeader />
+        <NavHeader
+          name={portfolioData?.portfolio?.investor?.name}
+          changeCurrencyCode={changeCurrencyCode}
+        />
 
         <CustomText
           fontFamily={Fonts.CircularStdBook}
@@ -239,64 +320,67 @@ const Dashboard = () => {
           top={15}
           fontWeight="400"
           color={Colors.white}>
-          $13,742.
-          <CustomText
-            fontFamily={Fonts.CircularStdBook}
-            fontSize={38}
-            top={15}
-            fontWeight="400"
-            color={'rgba(255,255,255,0.2)'}>
-            02
-          </CustomText>
+          {formatCurrency(
+            portfolioData?.marketValue || 0,
+            portfolioData?.currencyCode || 'USD',
+          )}
         </CustomText>
 
         <BtnRow />
 
         <SpacedCards mt={40}>
-          <Card
-            short="NFLX"
-            name="Netflix Inc"
-            quantity={50}
-            amount="$338.6"
-            strokeColor="#b9090b"
-            startRgba="rgba(185, 9, 11, 0.5)"
-            image="https://eodhistoricaldata.com/img/logos/US/nflx.png"
-            onPress={() => {}}
-          />
-          <Card
-            short="XOM"
-            name="Exxon Mobil Corp"
-            quantity={150}
-            amount="$116.1"
-            strokeColor="#2c6bc8"
-            startRgba="rgba(44, 106, 200, 0.5)"
-            image="https://eodhistoricaldata.com/img/logos/US/XOM.png"
-            onPress={() => {}}
-          />
-          <Card
-            short="GOOG"
-            name="Alphabet Inc Class C"
-            quantity={150}
-            amount="$109.5"
-            strokeColor="#8279ff"
-            startRgba="rgba(130, 121, 255, 0.5)"
-            image="https://eodhistoricaldata.com/img/logos/US/goog.png"
-            onPress={() => {}}
-          />
-          <Card
-            short="TSLA"
-            name="Tesla Inc"
-            quantity={25}
-            amount="$185.0"
-            strokeColor="#65ffff"
-            startRgba="rgba(101, 255, 255, 0.5)"
-            image="https://eodhistoricaldata.com/img/logos/US/TSLA.png"
-            onPress={() => {}}
-          />
+          {portfolioData?.securityValuations?.map(
+            (item: any, index: number) => {
+              const chartData =
+                portfolioData?.securityTimeSeries?.filter?.(
+                  (series: any) =>
+                    series?.key?.symbol === item?.security?.symbol,
+                ) || [];
+
+              const hexCode =
+                Colors[`${[item?.security?.symbol?.toLowerCase?.()]}_hex`];
+
+              const rgbaCode =
+                Colors[`${[item?.security?.symbol?.toLowerCase?.()]}_rgba`];
+
+              return (
+                <Card
+                  key={`${index}-card-chart`}
+                  short={item?.security?.symbol}
+                  name={item?.security?.name}
+                  quantity={item?.units}
+                  amount={`${formatCurrency(
+                    item?.marketPrice,
+                    portfolioData?.currencyCode || 'USD',
+                  )}`}
+                  strokeColor={hexCode || Colors.black}
+                  startRgba={rgbaCode || Colors.black}
+                  image={item?.security?.logoUrl}
+                  onPress={async () => {
+                    await setPortfolioInView({
+                      item,
+                      chartData,
+                      currencyCode: portfolioData?.currencyCode,
+                    });
+                    setDetailModalVisible(true);
+                  }}
+                  data={chartData}
+                />
+              );
+            },
+          )}
         </SpacedCards>
       </TopContainer>
 
-      <CardContentModal visible={false} dismiss={() => {}} />
+      <CardContentModal
+        data={portfolioInView}
+        visible={detailmodalVisible}
+        dismiss={() => {
+          setDetailModalVisible(false);
+        }}
+        portfolioId={portfolioData?.portfolio?.id}
+      />
+      <LoadingModal visible={loading} />
     </View>
   );
 };

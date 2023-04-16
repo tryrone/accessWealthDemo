@@ -10,10 +10,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.18.1",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
-    "@tamagui/toast": "^1.15.4",
     "burnt": "^0.10.0",
+    "formik": "^2.2.9",
     "patch-package": "^6.5.1",
     "postinstall-postinstall": "^2.1.0",
     "react": "18.2.0",
@@ -26,8 +27,10 @@
     "react-native-svg": "^13.9.0",
     "react-native-svg-transformer": "^1.0.0",
     "react-native-text": "^1.2.2",
+    "react-native-toast-message": "^2.1.6",
     "styled-components": "^5.3.9",
-    "victory-native": "^36.6.8"
+    "victory-native": "^36.6.8",
+    "yup": "^1.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
