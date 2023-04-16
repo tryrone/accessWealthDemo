@@ -39,3 +39,13 @@ export function formatCurrency(
 
   return formatter.format(Number(amount));
 }
+
+export const clearData = async () => {
+  try {
+    await AsyncStorage.clear();
+  } catch (e) {
+    // clear error
+  }
+
+  console.log('Done.');
+};

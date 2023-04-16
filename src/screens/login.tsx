@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import SafeAreaWrap from '../components/SafeAreaWrap';
 import Colors from '../constants/Colors';
 import styled from 'styled-components/native';
@@ -14,7 +15,7 @@ import {DASHBOARD} from '../constants/navigationConstants';
 import Toast from 'react-native-toast-message';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
-import {storeData} from '../utils';
+import {getData, storeData} from '../utils';
 
 const Row = styled.View`
   flex-direction: row;
@@ -57,6 +58,17 @@ const Login = ({navigation}: ScreenDefaultProps) => {
     username: Yup.string().required('Required'),
     password: Yup.string().required('Required'),
   });
+
+  useLayoutEffect(() => {
+    checkIfUserIsLoggedIn();
+  }, []);
+
+  const checkIfUserIsLoggedIn = async () => {
+    const userRes = await getData();
+    if (userRes) {
+      navigation.navigate(DASHBOARD);
+    }
+  };
 
   const loginUser = (values: {username: string; password: string}) => {
     setLoading(true);

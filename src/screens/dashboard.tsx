@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import {View} from 'react-native';
+import {TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components/native';
 import Colors from '../constants/Colors';
@@ -15,14 +15,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import CardContentModal from '../components/card/contentModal';
-import {formatCurrency, getData} from '../utils';
+import {clearData, formatCurrency, getData} from '../utils';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
 import LoadingModal from '../components/LoadingModal';
+import {LOGIN} from '../constants/navigationConstants';
+import {ScreenDefaultProps} from '../constants/types';
 
-type NavHeaderProps = {
+interface NavHeaderProps extends ScreenDefaultProps {
   name: string;
   changeCurrencyCode: (val: string) => void;
-};
+}
 
 const TopContainer = styled.View`
   width: 100%;
@@ -162,7 +164,11 @@ const CurrencySwitch = ({changeCurrencyCode}: any) => {
   );
 };
 
-const NavHeader = ({name, changeCurrencyCode}: NavHeaderProps) => {
+const NavHeader = ({name, changeCurrencyCode, navigation}: NavHeaderProps) => {
+  const logoutUser = async () => {
+    await clearData();
+    navigation.navigate(LOGIN);
+  };
   return (
     <NavWrap>
       <View style={{flex: 1}}>
@@ -186,9 +192,11 @@ const NavHeader = ({name, changeCurrencyCode}: NavHeaderProps) => {
 
       <CurrencySwitch changeCurrencyCode={changeCurrencyCode} />
 
-      <View style={{flex: 1, alignItems: 'flex-end'}}>
+      <TouchableOpacity
+        onPress={logoutUser}
+        style={{flex: 1, alignItems: 'flex-end'}}>
         <BellIcon />
-      </View>
+      </TouchableOpacity>
     </NavWrap>
   );
 };
@@ -233,7 +241,7 @@ const BtnRow = () => {
   );
 };
 
-const Dashboard = () => {
+const Dashboard = ({navigation}: ScreenDefaultProps) => {
   const [portfolioData, setPortfolioData] = useState<any>({});
   const [portfolioInView, setPortfolioInView] = useState<any>({});
   const [detailmodalVisible, setDetailModalVisible] = useState<boolean>(false);
@@ -304,6 +312,7 @@ const Dashboard = () => {
         <NavHeader
           name={portfolioData?.portfolio?.investor?.name}
           changeCurrencyCode={changeCurrencyCode}
+          navigation={navigation}
         />
 
         <CustomText
