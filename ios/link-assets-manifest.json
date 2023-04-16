@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/CircularStd-Book.ttf",
+      "sha1": "e41d5d04155f6233cdec9176a8a7eb3e0cd2b70a"
+    },
+    {
+      "path": "src/assets/fonts/MazzardH-Bold.otf",
+      "sha1": "f2cd9e3c06bdf5e41496f8f7be19e07d3b65a927"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Bold.ttf",
+      "sha1": "875cf0cecd647bcf22e79d633d868c1b1ec98dfa"
+    }
+  ]
+}
